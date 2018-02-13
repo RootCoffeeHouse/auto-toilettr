@@ -1,4 +1,5 @@
 # Imports
+import sys
 import os
 import time
 import RPi.GPIO as GPIO
@@ -10,10 +11,10 @@ GPIO.setmode(GPIO.BCM)
 #GPIO.setwarnings(False)
 
 #define the pins
-rele1 = 18
-rele2 = 17
-rele3 = 15
-rele4 = 14
+rele1 = 18	# azul / bano mujeres
+rele2 = 17 	# verde / Luz emergencia / always on
+rele3 = 24      # amarillo / ozonizador
+rele4 = 23      # naranja / bano hombres
 pir1 = MotionSensor(4)
 pir2 = MotionSensor(27)
 
@@ -23,13 +24,35 @@ GPIO.setup(rele2, GPIO.OUT)
 GPIO.setup(rele3, GPIO.OUT)
 GPIO.setup(rele4, GPIO.OUT)
 
-GPIO.output(rele1,  GPIO.HIGH)
-GPIO.output(rele2,  GPIO.HIGH)
-GPIO.output(rele3,  GPIO.HIGH)
-GPIO.output(rele4,  GPIO.LOW)
+ON = GPIO.LOW
+OFF = GPIO.HIGH
+
+GPIO.output(rele1,  OFF)
+GPIO.output(rele2,  OFF)
+GPIO.output(rele3,  OFF)
+GPIO.output(rele4,  OFF)
+
+# Flash all reles for a couple of secs to test
+GPIO.output(rele1,  ON)
+time.sleep(1)
+GPIO.output(rele1,  OFF)
+GPIO.output(rele2,  ON)
+time.sleep(1)
+GPIO.output(rele2,  OFF)
+GPIO.output(rele3,  ON)
+time.sleep(1)
+GPIO.output(rele3,  OFF)
+GPIO.output(rele4,  ON)
+time.sleep(1)
+GPIO.output(rele4,  OFF)
+
+
+# Luz de emergencia siempre encendida
+GPIO.output(rele2,  ON)
+
 
 # Define global vars
-tmoutvalue = 60
+tmoutvalue = 120
 sleeptime = 1
 tmoutpir1 = tmoutvalue
 tmoutpir2 = tmoutvalue
@@ -55,40 +78,40 @@ try:
 
 			if pir1.motion_detected:
 					#print("move detected in sensor 1")
-					GPIO.output(rele1,  GPIO.LOW)
+					GPIO.output(rele1,  ON)
 					#print("Rele 1 enabled")
 					pir1flag = 1
 					tmoutpir1 = tmoutvalue
 
-					GPIO.output(rele3,  GPIO.LOW)
+					GPIO.output(rele3, ON)
 					rele3flag = 1
 
 
 			if pir2.motion_detected:
 					#print("move detected in sensor 2")
-					GPIO.output(rele2,  GPIO.LOW)
-					#print("Rele 2 enabled")
+					GPIO.output(rele4,  ON)
+					#print("Rele 4 enabled")
 					pir2flag = 1
 					tmoutpir2 = tmoutvalue
 
-					GPIO.output(rele3,  GPIO.LOW)
+					GPIO.output(rele3, ON)
 					rele3flag = 1
 
 
 			if pir1flag == 0 and pir2flag == 0:
 					if rele3flag == 1:
-							GPIO.output(rele3,  GPIO.HIGH)
+							GPIO.output(rele3, OFF)
 							rele3flag = 0
 							#print("Rele 3 disabled")
 
 			if tmoutpir1==0:
-					GPIO.output(rele1,  GPIO.HIGH)
+					GPIO.output(rele1, OFF)
 					pir1flag = 0
 					tmoutpir1 = tmoutvalue
 					#print("Rele 1 disabled")
 
 			if tmoutpir2==0:
-					GPIO.output(rele2,  GPIO.HIGH)
+					GPIO.output(rele4, OFF)
 					pir2flag = 0
 					tmoutpir2 = tmoutvalue
 					#print("Rele 2 disabled")
@@ -104,3 +127,4 @@ try:
 except KeyboardInterrupt:
     print("Quit")
     GPIO.cleanup()
+
