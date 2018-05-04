@@ -12,6 +12,7 @@ FILES=`ls /home/pi/music/*.mp3`
 
 # who's playing it
 OMXPLAYER="/usr/bin/omxplayer"
+PARAMETERS="--vol -1502"
 
 echo "*****INFINITE LOOPING SCRIPT!!!"
 echo "*****ABORT WITH CTRL+C"
@@ -24,7 +25,7 @@ while true; do
 
             # let's play
             echo $entry
-            $OMXPLAYER "$entry" > /dev/null
+            $OMXPLAYER $PARAMETERS "$entry" > /dev/null
         done
     done
 done
